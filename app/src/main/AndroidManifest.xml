@@ -43,8 +43,6 @@
             <data android:mimeType="vnd.android.cursor.dir/contact" />
         </intent>
 
-        <uses-feature android:name="android.hardware.camera"
-            android:required="false"/>
         <intent>
             <action android:name="android.media.action.IMAGE_CAPTURE" />
         </intent>
