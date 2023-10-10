@@ -7,8 +7,10 @@ import android.net.Uri
 import android.os.Bundle
 import android.provider.ContactsContract
 import android.text.format.DateFormat
-import android.util.Log
 import android.view.LayoutInflater
+import android.view.Menu
+import android.view.MenuInflater
+import android.view.MenuItem
 import android.view.View
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
@@ -44,6 +46,12 @@ class CrimeDetailFragment : Fragment() {
     private val crimeDetailViewModel: CrimeDetailViewModel by viewModels {
         CrimeDetailViewModelFactory(args.crimeId)
     }
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setHasOptionsMenu(true)
+    }
+
     private val selectSuspect = registerForActivityResult(
         ActivityResultContracts.PickContact()
     ) { uri: Uri? ->
@@ -137,6 +145,31 @@ class CrimeDetailFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.fragment_crime_detail, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        return when (item.itemId) {
+            R.id.remove_crime -> {
+                removeAndReturn()
+                true
+            }
+            else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun removeAndReturn() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            crimeDetailViewModel.crime.collect { crime ->
+                crime?.let { crimeDetailViewModel.removeCrime(it) }
+            }
+        }
+        findNavController().navigate(
+            CrimeDetailFragmentDirections.returnToList()
+        )
     }
 
     private fun updateUi(crime: Crime) {
