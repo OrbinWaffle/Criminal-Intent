@@ -16,8 +16,8 @@ import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bignerdranch.android.criminalintent.databinding.FragmentCrimeListBinding
 import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.count
 import kotlinx.coroutines.launch
-import java.text.DateFormat
 import java.util.Date
 import java.util.UUID
 
@@ -32,11 +32,11 @@ class CrimeListFragment : Fragment() {
         }
 
     private val crimeListViewModel: CrimeListViewModel by viewModels()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setHasOptionsMenu(true)
     }
+
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -53,9 +53,19 @@ class CrimeListFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        binding.apply {
+            addCrimeButton.setOnClickListener {
+                showNewCrime()
+            }
+        }
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 crimeListViewModel.crimes.collect { crimes ->
+
+                    val count = crimes.count()
+                    binding.noCrimeView.visibility = if (count > 0) View.GONE else View.VISIBLE
+
                     binding.crimeRecyclerView.adapter =
                         CrimeListAdapter(crimes) { crimeID ->
                             findNavController().navigate(
